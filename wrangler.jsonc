@@ -2,5 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nin-swindon",
   "pages_build_output_dir": "./public",
-  "compatibility_date": "2026-08-18"
+  "compatibility_date": "2026-08-18",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nin-swindon-bookings",
+      "database_id": "83c65d48-fa94-40bb-9b66-db0748f651e9"
+    }
+  ]
 }
