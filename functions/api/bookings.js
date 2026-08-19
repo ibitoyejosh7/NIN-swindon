@@ -1,4 +1,4 @@
-const COMPANY_EMAIL = '';
+const COMPANY_EMAIL = 'oladapoibitoye@outlook.com';
 const ADULT_PRICE = 80;
 const CHILD_PRICE = 60;
 const RESERVATION_MINUTES = 10;
@@ -7,7 +7,7 @@ const json = (data,status=200)=>new Response(JSON.stringify(data),{status,header
 const clean=(value,max=200)=>String(value??'').replace(/[<>]/g,'').trim().slice(0,max);
 function priceForAge(age){return Number(age)>=18?ADULT_PRICE:CHILD_PRICE}
 function parseDateOnly(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;const [year,month,day]=value.split('-').map(Number),date=new Date(Date.UTC(year,month-1,day,12));if(date.getUTCFullYear()!==year||date.getUTCMonth()!==month-1||date.getUTCDate()!==day)return null;return date}
-function isFutureAppointment(dateString,timeString){if(!parseDateOnly(dateString)||!/^[0-9]{2}:[0-9]{2}$/.test(timeString))return false;const [hour,minute]=timeString.split(':').map(Number),p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).reduce((a,x)=>(a[x.type]=x.value,a),{}),today=`${p.year}-${p.month}-${p.day}`;if(dateString>today)return true;if(dateString<today)return false;return hour*60+minute>Number(p.hour)*60+Number(p.minute)}
+function isFutureAppointment(dateString,timeString){if(!parseDateOnly(dateString)||!/^\d{2}:\d{2}$/.test(timeString))return false;const [hour,minute]=timeString.split(':').map(Number),p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).reduce((a,x)=>(a[x.type]=x.value,a),{}),today=`${p.year}-${p.month}-${p.day}`;if(dateString>today)return true;if(dateString<today)return false;return hour*60+minute>Number(p.hour)*60+Number(p.minute)}
 function validTimeForDate(dateString,timeString){const date=parseDateOnly(dateString);if(!date||!/^[0-9]{2}:[0-9]{2}$/.test(timeString))return false;const [hour,minute]=timeString.split(':').map(Number),total=hour*60+minute,weekend=[0,6].includes(date.getUTCDay()),start=(weekend?11:18)*60,end=(weekend?19:21)*60;return hour<=23&&minute<=59&&total>=start&&total<end&&minute%30===0}
 function ageFromDob(dobString,today=new Date()){const dob=parseDateOnly(dobString);if(!dob)return null;let age=today.getUTCFullYear()-dob.getUTCFullYear();const md=today.getUTCMonth()-dob.getUTCMonth();if(md<0||(md===0&&today.getUTCDate()<dob.getUTCDate()))age--;return age}
 async function clearExpiredReservations(db,appointmentDate=null,appointmentTime=null){let sql=`DELETE FROM bookings WHERE status='reserved' AND expires_at IS NOT NULL AND expires_at<=datetime('now')`;const bindings=[];if(appointmentDate){sql+=' AND appointment_date=?';bindings.push(appointmentDate)}if(appointmentTime){sql+=' AND appointment_time=?';bindings.push(appointmentTime)}await db.prepare(sql).bind(...bindings).run()}
